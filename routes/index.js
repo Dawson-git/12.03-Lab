@@ -53,4 +53,43 @@ router.post('/delete', function (req, res, next) {
     }
 });
 
+//edit routine
+router.post('/edit', function (req, res, next) {
+    const { id, task } = req.body;
+    if (!task || task.trim() === '') {
+        return res.status(400).send('Task cannot be blank');
+    }
+    try {
+        req.db.query('UPDATE todos SET task = ? WHERE id = ?;', [task.trim(), id], (err, results) => {
+            if (err) {
+                console.error('Error updating todo:', err);
+                return res.status(500).send('Error updating todo');
+            }
+            res.redirect('/');
+        });
+    } catch (error) {
+        console.error('Error updating todo:', error);
+        res.status(500).send('Error updating todo');
+    }
+});
+
+//complete
+router.post('/toggle', function (req, res, next) {
+    const { id, completed } = req.body;
+    // flip the current state: if completed=1, set to 0, and vice versa
+    const newState = completed === '1' ? 0 : 1;
+    try {
+        req.db.query('UPDATE todos SET completed = ? WHERE id = ?;', [newState, id], (err, results) => {
+            if (err) {
+                console.error('Error toggling todo:', err);
+                return res.status(500).send('Error toggling todo');
+            }
+            res.redirect('/');
+        });
+    } catch (error) {
+        console.error('Error toggling todo:', error);
+        res.status(500).send('Error toggling todo');
+    }
+});
+
 module.exports = router;
